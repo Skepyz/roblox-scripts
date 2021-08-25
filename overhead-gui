@@ -1,0 +1,206 @@
+--[[
+												 			Scripted by Helpish
+														
+														
+								
+			
+--]]
+-- Rank GUI script. Easily customizable.
+
+--[[ SETTINGS ]]--
+local MAIN_GROUP = 1 -- Group of Choice
+
+local SETTINGS = {
+	RolePrefix = " - ",
+	RoleSuffix = " - ",
+}
+
+local CUSTOM_ROLES = {
+	["NA"] = {
+		GroupId = 1,
+		Players = {},
+		Tag = "[NA] ",
+		IncludeDivisionRole = true
+
+	},
+		["NA"] = {
+		GroupId = 1,
+		Players = {},
+		Tag = "[NA] ",
+		IncludeDivisionRole = true
+	},
+		["NA"] = {
+		GroupId = 1,
+		Players = {},
+		Tag = "[NA] ",
+		IncludeDivisionRole = true
+	},
+		["NA"] = {
+		GroupId = 1,
+		Players = {},
+		Tag = "[NA] ",
+		IncludeDivisionRole = true
+	},
+		["NA"] = {
+		GroupId = 1,
+		Players = {},
+		Tag = "[NA] ",
+		IncludeDivisionRole = true
+	},
+		["NA"] = {
+		GroupId = 1,
+		Players = {},
+		Tag = "[NA] ",
+		IncludeDivisionRole = true
+	},
+	    ["Script Maker"] = {   -- I request you keep this for recognition considering I'm letting you use it for free.
+		GroupId = 1,
+		Players = {3041405},
+		Tag = "[SCRIPTER] ",
+		IncludeDivisionRole = false
+	},	
+	
+}
+--[[
+	ROLE TEMPLATE:
+	["RoleName"] = {
+		GroupId = 0,
+		Players = {},
+		Color = Color3.fromRGB(245,100,100),
+		Tag = "CustomRole",
+		IncludeDivisionRole = true
+	},
+--]]
+
+
+
+
+
+-- [[ MAIN ]] --
+local plrs = game:GetService("Players")
+local rank_gui = script.Rank
+local teams = game:GetService("Teams")
+
+--Removing underscores
+function removeUnderscrores(rank)
+	rank = string.gsub(rank,"_"," ")
+	return rank
+end
+
+--Checking if someone is a dev, and if so, getting their rank
+function checkIfDev(plr)
+	local devRank
+	local isDev
+	local plrId = plr.UserId
+	for rank,id in pairs(CUSTOM_ROLES.Development.Players) do
+		if id == plrId then
+			devRank = removeUnderscrores(rank)
+			isDev = true
+			break
+		else
+			isDev = false
+		end
+	end
+	return isDev,devRank
+end
+
+--Making name tag
+function assembleNametag(name, rank, tag, color)
+	local gui = rank_gui:Clone()
+	local newrank = (SETTINGS.RolePrefix or "")..rank..(SETTINGS.RoleSuffix or "")
+	
+	local background = gui:WaitForChild("Background")
+	local nameLabel = background:WaitForChild("UserN")
+	local rankLabel = background:WaitForChild("Rank")
+	local dtagLabel = background:WaitForChild("DivisionRank")
+	
+	nameLabel.Text = name
+	rankLabel.Text = newrank
+	dtagLabel.Text = tag or ""
+	if not color then
+		color = SETTINGS.DefaultColor
+	end
+	nameLabel.TextColor3 = color
+	local dimColor = Color3.new(color.r-.05,color.g-.05,color.b-.05)
+	rankLabel.TextColor3 = dimColor
+	dtagLabel.TextColor3 = dimColor
+	
+	return gui
+end
+
+--Getting information
+plrs.PlayerAdded:Connect(function(plr)
+	wait(5)
+	local rank = plr:GetRankInGroup(MAIN_GROUP)
+	local role
+	if rank > 0 then
+		role = plr:GetRoleInGroup(MAIN_GROUP)
+	else
+		role = 'NA'
+	end
+	local tag
+	local color = plr.TeamColor.Color
+	for roleName, roleData in pairs(CUSTOM_ROLES) do
+		if roleData.Players then--For specific players
+			for i, userId in pairs(roleData.Players) do
+				if plr.UserId == userId then
+					if roleData.IncludeDivisionRole == true then
+						tag = roleData.Tag..plr:GetRoleInGroup(roleData.GroupId)
+					else
+						tag = roleData.Tag
+					end
+					break
+				end
+			end
+		end
+		if roleData.GroupId then --For the entire group
+			local rank = plr:GetRankInGroup(roleData.GroupId)
+			if rank > 0 then
+				if roleData.IncludeDivisionRole == true then
+					tag = roleData.Tag..plr:GetRoleInGroup(roleData.GroupId)
+				else
+					tag = roleData.Tag
+				end
+				break
+			end
+		end
+	end
+	
+	if plr:GetRankInGroup(MAIN_GROUP) == 0 then
+		tag = ''
+		color = plr.TeamColor.Color
+	end
+	if plr.Team == game.Teams["NA"] then
+		tag = 'No division'
+		color = plr.TeamColor.Color
+	end
+	
+	if plr.Team == game.Teams.NA then
+		local isDev,devRank = checkIfDev(plr)
+		if isDev then
+			tag = '[NA] '..devRank
+		elseif plr:GetRankInGroup(1) == 9 then
+			tag = "[NA] "..plr:GetRoleInGroup(1)
+		else
+			tag = '[NA] '..plr:GetRoleInGroup(MAIN_GROUP)
+		end
+	end
+	
+	if plr.Team == game.Teams.NA then
+		tag = 'NA'
+	end
+		
+	if plr.Character then
+		local head = plr.Character:WaitForChild("Head")
+		assembleNametag(plr.Name, role, tag, color).Parent = head
+		local hum = plr.Character:WaitForChild("Humanoid")
+		hum.DisplayDistanceType = Enum.HumanoidDisplayDistanceType.None
+	end
+	plr.CharacterAdded:Connect(function(char)
+		color = plr.TeamColor.Color
+		local head = char:WaitForChild("Head")
+		assembleNametag(plr.Name, role, tag, color).Parent = head
+		local hum = char:WaitForChild("Humanoid")
+		hum.DisplayDistanceType = Enum.HumanoidDisplayDistanceType.None
+	end)
+end)

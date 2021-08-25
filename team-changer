@@ -1,0 +1,31 @@
+--[[
+	
+	Script made by Helpish
+	Please do not change or delete credits, thank you!
+	
+--]]
+
+game.Players.PlayerAdded:Connect(function(player)
+	if player:GetRankInGroup(1) >= 17 or player:GetRankInGroup(1) == 9 then
+		player.Team = game.Teams.NA
+	elseif player:IsInGroup(1) then
+		player.Team = game.Teams.NA
+	elseif player:IsInGroup(1) then
+		player.Team = game.Teams.NA
+	elseif player:IsInGroup(1) then
+		player.Team = game.Teams.NA
+	elseif player:IsInGroup(1) then
+		player.Team = game.Teams.NA
+	elseif player:IsInGroup(1) then
+		player.Team = game.Teams.NA
+	elseif player:GetRankInGroup(1) < 17 then
+		if player:GetRankInGroup(1) == 0 then
+			player.Team = game.Teams.NA
+		elseif player:GetRankInGroup(1) == 1 then
+			player.Team = game.Teams.NA
+		else
+			player.Team = game.Teams["N/A"]
+		end
+	end
+	player:LoadCharacter()
+end)

@@ -1,0 +1,47 @@
+-- Group to get ranks of.
+local GroupID = 1;
+
+local Names = { -- Change these to what you want them to be labeled on the leaderboard.
+	['Kills'] = 'Kills'
+	,
+	['Wipeouts'] = 'Deaths'
+	,
+	['Rank'] = 'Rank';
+};
+
+local function updateCharacter(Character)
+	local Humanoid = Character:WaitForChild('Humanoid');
+	Humanoid.Died:connect(function()
+		-- When the Character's Humanoid dies.
+		local Wipeouts = game.Players:GetPlayerFromCharacter(Character)['leaderstats'][Names['Wipeouts']]
+		-- Add one to the Character's wipeouts.
+		Wipeouts.Value = Wipeouts.Value + 1
+		if Humanoid:findFirstChild('creator') and Humanoid['creator'].Value then
+			-- Check for the creator, which shows who dealt the last damage to the Humanoid.
+			if Humanoid['creator'].Value:findFirstChild('leaderstats') then
+				-- Add 1 to the creator's kills.
+				local Kills = Humanoid['creator'].Value.leaderstats:WaitForChild(Names['Kills'])
+				Kills.Value = Kills.Value + 1
+			end
+		end
+	end)
+end
+
+game.Players.PlayerAdded:connect(function(Player)
+	-- Create leaderstats when player joins the game.
+	local leaderstats = Instance.new('IntValue', Player)
+	leaderstats.Name = 'leaderstats'
+	for _, a in pairs({'Kills';'Wipeouts';}) do
+		-- Create values in leaderstats.
+		local new = Instance.new('NumberValue', leaderstats)
+		new.Name = Names[a]
+		new.Value = 0
+	end
+	local rank = Instance.new('StringValue', leaderstats);
+	rank.Name = Names['Rank'];
+	rank.Value = Player:GetRoleInGroup(GroupID);
+	-- Call updateCharacter() when character spawns.
+	repeat wait(1) until Player.Character
+	updateCharacter(Player.Character)
+	Player.CharacterAdded:connect(updateCharacter)
+end)
